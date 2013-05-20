@@ -1,0 +1,24 @@
+{
+	"plugin": [],
+	"bundle": [
+	{"type": "git", "location": "git://github.com/tarmack/vim-python-ftplugin.git"},
+	{"type": "git", "location": "git://github.com/corntrace/bufexplorer.git"},
+	{"type": "git", "location": "git://github.com/sjl/gundo.vim.git"},
+	{"type": "git", "location": "git://github.com/scrooloose/nerdtree.git"},
+	{"type": "git", "location": "git://github.com/SirVer/ultisnips.git"},
+	{"type": "git", "location": "git://github.com/ervandew/supertab.git"},
+	{"type": "git", "location": "git://github.com/majutsushi/tagbar.git"},
+	{"type": "git", "location": "git://github.com/jeroenbourgois/vim-actionscript.git"},
+	{"type": "git", "location": "git://github.com/tpope/vim-markdown.git"},
+	{"type": "git", "location": "git://github.com/tpope/vim-ragtag.git"},
+	{"type": "git", "location": "git://github.com/tpope/vim-repeat.git"},
+	{"type": "git", "location": "git://github.com/xolox/vim-session.git"},
+	{"type": "git", "location": "git://github.com/tpope/vim-surround.git"},
+	{"type": "git", "location": "git://github.com/hynek/vim-python-pep8-indent.git"},
+	{"type": "git", "location": "git://github.com/vim-scripts/TaskList.vim.git"}
+		],
+	"colors": [
+	{"type": "curl", "location": "https://raw.github.com/tomasr/molokai/master/colors/molokai.vim"}
+		],
+	"autoload": []
+}
