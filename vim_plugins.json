@@ -15,7 +15,8 @@
 	{"type": "git", "location": "git://github.com/xolox/vim-session.git"},
 	{"type": "git", "location": "git://github.com/tpope/vim-surround.git"},
 	{"type": "git", "location": "git://github.com/hynek/vim-python-pep8-indent.git"},
-	{"type": "git", "location": "git://github.com/vim-scripts/TaskList.vim.git"}
+	{"type": "git", "location": "git://github.com/vim-scripts/TaskList.vim.git"},
+	{"type": "git", "location": "https://github.com/xolox/vim-misc.git"}
 		],
 	"colors": [
 	{"type": "curl", "location": "https://raw.github.com/tomasr/molokai/master/colors/molokai.vim"}
