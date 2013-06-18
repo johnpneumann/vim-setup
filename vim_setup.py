@@ -9,7 +9,8 @@
 .. moduleauthor:: jneumann
 
 .. note::
-    None
+    None.
+
 """
 # Built In
 import os
@@ -75,6 +76,10 @@ class VimSetup(object):
         if not setup_result:
             self.handle_failure()
 
+        msg = ('If a problem occurs with your new vim setup, your previous '
+               '.vim, is backed up here: %s' % (self.backup_directory))
+        generic_msg.info(msg)
+
         msg = ('Finished setup. Looks like it worked! Woot! '
                'Thanks for using it!')
         generic_msg.final(msg)
@@ -89,6 +94,8 @@ class VimSetup(object):
             bool. True or False
 
         """
+        msg = ('Backing up your vim directory...')
+        generic_msg.info(msg)
         self.backup_directory = os.path.join(self.home_dir, '.vim_backup')
         if os.path.exists(self.backup_directory):
             msg = ('It appears that the directory already exists. Would you '
@@ -106,7 +113,7 @@ class VimSetup(object):
                 generic_msg.info(msg)
                 sys.exit(1)
 
-        result = self.handle_moving_dirs(self.vim_dir, self.backup_directory)
+        result = handle_moving_dirs(self.vim_dir, self.backup_directory)
         return result
 
     def vim_setup(self):
@@ -122,7 +129,7 @@ class VimSetup(object):
         pathogen_dirs = ['autoload', 'bundle',
                          'colors', 'plugin']
 
-        vimdir_result = self.handle_mkdir(self.vim_dir)
+        vimdir_result = handle_mkdir(self.vim_dir)
         if not vimdir_result['success']:
             generic_msg.error(vimdir_result['msg'])
             self.handle_failure()
@@ -132,7 +139,7 @@ class VimSetup(object):
         generic_msg.info(msg)
         for dirname in pathogen_dirs:
             full_dirname = os.path.join(self.vim_dir, dirname)
-            dir_result = self.handle_mkdir(full_dirname)
+            dir_result = handle_mkdir(full_dirname)
             if not dir_result['success']:
                 generic_msg.error(dir_result['msg'])
                 self.handle_failure()
@@ -174,7 +181,12 @@ class VimSetup(object):
         with open(plugin_file, 'r') as fopen:
             try:
                 vim_plugins = json.loads(fopen.read())
-            except Exception as err:
+            except ValueError as err:
+                msg = ('An error occurred when attempting to parse the '
+                       'json file. Error: %s' % (err))
+                generic_msg.error(err)
+                self.handle_failure()
+            except TypeError as err:
                 msg = ('An error occurred when attempting to parse the '
                        'json file. Error: %s' % (err))
                 generic_msg.error(err)
@@ -269,7 +281,7 @@ class VimSetup(object):
             '.markdown',
             '.md'
         ]
-        for root, dirs, files in os.walk(self.vim_dir):
+        for root, _, files in os.walk(self.vim_dir):
             for fname in files:
                 ext = os.path.splitext(fname)[-1]
                 if ext in cleanup_extensions:
@@ -283,101 +295,6 @@ class VimSetup(object):
                         status_code += 1
 
         return status_code
-
-    def handle_mkdir(self, dir_name):
-        """Handles making directories so we don't replicate code.
-
-        Args:
-            dir_name (str): The directory to create.
-
-        Returns:
-            dict. Failure or Success and the output message.
-                {'success': True,
-                'msg': 'Success message'}
-                {'success': False,
-                'msg': 'Failure message'}
-
-        """
-        out_data = {
-            'success': True,
-            'msg': 'Successfully created directory: %s' % (dir_name)
-        }
-        if os.path.exists(dir_name):
-            msg = ('Directory %s exists. Attempting to '
-                   'remove it.' % (dir_name))
-            generic_msg.info(msg)
-            rmdir_result = self.handle_rmdir(dir_name)
-            if not rmdir_result:
-                msg = ('Was not able to delete it. Will continue on '
-                       'hoping for the best. :)')
-                generic_msg.warning(msg)
-                return out_data
-        try:
-            os.mkdir(dir_name)
-        except OSError as err:
-            out_data['msg'] = ('Failed to create directory: %s. '
-                               'Error: %s' % (dir_name, err))
-            out_data['success'] = False
-
-        return out_data
-
-    def handle_rmdir(self, dir_name, recursive=False):
-        """Handles removing directories so we don't replicate code.
-
-        Args:
-            dir_name (str): The directory to remove.
-            recursive (bool): Remove it recursively or not.
-
-        Returns:
-            bool. True or False.
-
-        """
-        if recursive:
-            try:
-                os.removedirs(dir_name)
-            except OSError as err:
-                msg = ('Failure to remove directory %s. '
-                       'Error: %s' % (dir_name, err))
-                generic_msg.error(msg)
-                return False
-        else:
-            try:
-                os.rmdir(dir_name)
-            except OSError as err:
-                msg = ('Failure to remove directory %s. '
-                       'Error: %s' % (dir_name, err))
-                generic_msg.error(msg)
-                return False
-
-        return True
-
-    def handle_moving_dirs(self, dir_location, new_location):
-        """Handles moving our directories.
-
-        Args:
-            dir_location (str): The directory to move.
-            new_location (str): Where to move it to.
-
-        Returns:
-            bool. True or False.
-
-        """
-        if os.path.exists(new_location):
-            msg = ('Location we are trying to move to already '
-                   'exists: %s.' % (new_location))
-            generic_msg.error(msg)
-            return False
-
-        if os.path.exists(dir_location):
-            try:
-                shutil.move(dir_location, new_location)
-            except shutil.Error as err:
-                msg = ('There was an error moving directory %s to %s. '
-                       'Error: %s' % (dir_location, new_location, err))
-                generic_msg.error(msg)
-                return False
-
-        return True
 
     def handle_failure(self):
         """Handles our failure cases.
@@ -396,7 +313,7 @@ class VimSetup(object):
         if input_result in self.yes_answers:
             msg = ('Rolling back changes.')
             generic_msg.info(msg)
-            rmdir_result = self.handle_rmdir(self.vim_dir, recursive=True)
+            rmdir_result = handle_rmdir(self.vim_dir, recursive=True)
             if not rmdir_result:
                 msg = ('There was an issue removing the .vim directory.')
                 generic_msg.error(msg)
@@ -404,8 +321,7 @@ class VimSetup(object):
                 msg = ('Moving the backup directory %s back '
                        'to .vim.' % (self.backup_directory))
                 generic_msg.info(msg)
-                result = self.handle_moving_dirs(self.backup_directory,
-                                                 self.vim_dir)
+                handle_moving_dirs(self.backup_directory, self.vim_dir)
         else:
             msg = ('Not rolling back. VIM setup may be '
                    'incomplete. Your backup can be found '
@@ -414,6 +330,102 @@ class VimSetup(object):
 
         exit_msg = ('Failed to do the setup properly. My apologies.')
         sys.exit(exit_msg)
+
+def handle_mkdir(dir_name):
+    """Handles making directories so we don't replicate code.
+
+    Args:
+        dir_name (str): The directory to create.
+
+    Returns:
+        dict. Failure or Success and the output message.
+            {'success': True,
+            'msg': 'Success message'}
+            {'success': False,
+            'msg': 'Failure message'}
+
+    """
+    out_data = {
+        'success': True,
+        'msg': 'Successfully created directory: %s' % (dir_name)
+    }
+    if os.path.exists(dir_name):
+        msg = ('Directory %s exists. Attempting to '
+               'remove it.' % (dir_name))
+        generic_msg.info(msg)
+        rmdir_result = handle_rmdir(dir_name)
+        if not rmdir_result:
+            msg = ('Was not able to delete it. Will continue on '
+                   'hoping for the best. :)')
+            generic_msg.warning(msg)
+            return out_data
+    try:
+        os.mkdir(dir_name)
+    except OSError as err:
+        out_data['msg'] = ('Failed to create directory: %s. '
+                           'Error: %s' % (dir_name, err))
+        out_data['success'] = False
+
+    return out_data
+
+def handle_rmdir(dir_name, recursive=False):
+    """Handles removing directories so we don't replicate code.
+
+    Args:
+        dir_name (str): The directory to remove.
+        recursive (bool): Remove it recursively or not.
+
+    Returns:
+        bool. True or False.
+
+    """
+    if recursive:
+        try:
+            os.removedirs(dir_name)
+        except OSError as err:
+            msg = ('Failure to remove directory %s. '
+                   'Error: %s' % (dir_name, err))
+            generic_msg.error(msg)
+            return False
+    else:
+        try:
+            os.rmdir(dir_name)
+        except OSError as err:
+            msg = ('Failure to remove directory %s. '
+                   'Error: %s' % (dir_name, err))
+            generic_msg.error(msg)
+            return False
+
+    return True
+
+def handle_moving_dirs(dir_location, new_location):
+    """Handles moving our directories.
+
+    Args:
+        dir_location (str): The directory to move.
+        new_location (str): Where to move it to.
+
+    Returns:
+        bool. True or False.
+
+    """
+    if os.path.exists(new_location):
+        msg = ('Location we are trying to move to already '
+               'exists: %s.' % (new_location))
+        generic_msg.error(msg)
+        return False
+
+    if os.path.exists(dir_location):
+        try:
+            shutil.move(dir_location, new_location)
+        except shutil.Error as err:
+            msg = ('There was an error moving directory %s to %s. '
+                   'Error: %s' % (dir_location, new_location, err))
+            generic_msg.error(msg)
+            return False
+
+    return True
+
 
 if __name__ == '__main__':
     main()
