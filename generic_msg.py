@@ -1,10 +1,13 @@
 """Generic messaging functions.
 
-.. module:: none
+.. module:: generic_msg
     :platform: Unix, Linux
-        :synopsis: Generic messaging functions
+        :synopsis: Generic messaging functions.
 
 .. moduleauthor:: jneumann
+
+.. note::
+    None.
 
 """
 # Built In
@@ -14,15 +17,14 @@ import random
 # Third Party
 
 # Custom
-#------------------------------------------------------------------ Globals -#
-colors = {'red': '\033[31m',
+
+COLORS = {'red': '\033[31m',
           'green': '\033[32m',
           'yellow': '\033[33m',
           'blue': '\033[34m',
           'magenta': '\033[35m',
           'white': '\033[0m'}
 
-#---------------------------------------------------------------- Functions -#
 def info(msg):
     """Information Messages
 
@@ -30,9 +32,9 @@ def info(msg):
         msg (str): The info message to output.
 
     """
-    sys.stdout.write('%s[INFO] %s%s\n' % (colors['magenta'],
+    sys.stdout.write('%s[INFO] %s%s\n' % (COLORS['magenta'],
                                           msg,
-                                          colors['white']))
+                                          COLORS['white']))
 
     return
 
@@ -43,9 +45,9 @@ def error(msg):
         msg (str): The error message to output.
 
     """
-    sys.stderr.write('%s[ERROR] %s%s\n' % (colors['red'],
+    sys.stderr.write('%s[ERROR] %s%s\n' % (COLORS['red'],
                                            msg,
-                                           colors['white']))
+                                           COLORS['white']))
 
     return
 
@@ -56,9 +58,9 @@ def warning(msg):
         msg (str): The warning message to output.
 
     """
-    sys.stdout.write('%s[WARNING] %s%s\n' % (colors['yellow'],
+    sys.stdout.write('%s[WARNING] %s%s\n' % (COLORS['yellow'],
                                              msg,
-                                             colors['white']))
+                                             COLORS['white']))
 
     return
 
@@ -67,12 +69,14 @@ def prompt(msg):
 
     Args:
         msg (str): The prompt message to output.
-            It is up to the developer to create the call to read in input.
+
+    .. note::
+        It is up to the developer to create the call to read input.
 
     """
-    sys.stdout.write('%s[USER_INPUT_REQUIRED] %s%s\n' % (colors['green'],
+    sys.stdout.write('%s[USER_INPUT_REQUIRED] %s%s\n' % (COLORS['green'],
                                                          msg,
-                                                         colors['white']))
+                                                         COLORS['white']))
     return
 
 def final(msg):
@@ -84,12 +88,12 @@ def final(msg):
     """
     final_string = []
     for out in '[FINAL] ':
-        final_string.append('%s%s' % (random.choice(colors.values()),
+        final_string.append('%s%s' % (random.choice(COLORS.values()),
                                       out))
     for char in msg:
-        final_string.append('%s%s' % (random.choice(colors.values()),
+        final_string.append('%s%s' % (random.choice(COLORS.values()),
                                       char))
-    sys.stdout.write('%s%s\n' % (''.join(final_string), colors['white']))
+    sys.stdout.write('%s%s\n' % (''.join(final_string), COLORS['white']))
 
     return
 
